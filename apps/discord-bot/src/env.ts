@@ -1,5 +1,5 @@
-import { env as bunEnv } from "bun";
 import { z } from "zod";
+import "dotenv/config";
 
 const schema = z.object({
   DISCORD_BOT_TOKEN: z.string(),
@@ -24,7 +24,7 @@ const schema = z.object({
     .default(""),
 });
 
-const result = schema.safeParse(bunEnv);
+const result = schema.safeParse(process.env);
 if (!result.success) {
   console.log("❌ Invalid environments variables:");
   console.log(

@@ -1,5 +1,5 @@
 import { getAccountBalance, initAccounts, setAccountBalance } from "./account";
-import { makeResultEmbed } from "./discord";
+import { makeResultEmbed } from "./discordUtils";
 import { env } from "./env";
 import {
   initTracking,
@@ -24,6 +24,7 @@ import {
   Message,
   Partials,
 } from "discord.js";
+import * as readline from "node:readline";
 
 // user mode = write in console, send in channel
 const flagIndex = process.argv.indexOf("--user");
@@ -208,11 +209,23 @@ client.on("ready", async (client) => {
       console.error("ERROR: invalid channel");
       process.exit(1);
     }
-    process.stdout.write(`${chan.name} ~ `);
-    for await (const line of console) {
+
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+      prompt: `${chan.name} ~ `,
+    });
+
+    rl.prompt();
+
+    rl.on("line", async (line) => {
       await chan.send(line);
-      process.stdout.write(`${chan.name} ~ `);
-    }
+      rl.prompt();
+    });
+
+    rl.on("close", () => {
+      process.exit(0);
+    });
   } else {
     await initAccounts();
     await initTracking();

@@ -1,1 +1,0 @@
-# wov-quest-results

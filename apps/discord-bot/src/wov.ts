@@ -1,5 +1,6 @@
 import { env } from "./env";
-import { mkdir } from "node:fs/promises";
+import { mkdir, readFile, writeFile, access } from "node:fs/promises";
+import { constants } from "node:fs";
 
 export type QuestResult = {
   quest: {
@@ -32,35 +33,42 @@ export const checkForNewQuest = async (): Promise<QuestResult | null> => {
   const lastQuest = await getLatestQuest();
 
   const lastId = lastQuest.quest.id;
-  const cacheFile = Bun.file(".cache/.quest_cache");
+  const cacheFilePath = ".cache/.quest_cache";
   await mkdir(".cache", { recursive: true });
-  if (await cacheFile.exists()) {
-    const cachedQuestId = await cacheFile.text();
+
+  try {
+    await access(cacheFilePath, constants.F_OK);
+    const cachedQuestId = await readFile(cacheFilePath, "utf-8");
     if (cachedQuestId === lastId || cachedQuestId === "IGNORE") {
       return null;
     }
+  } catch {
+    // File doesn't exist, continue
   }
 
-  await cacheFile.write(lastId);
+  await writeFile(cacheFilePath, lastId);
   return lastQuest;
 };
 export const getClanMembers = async (): Promise<
   Array<{ playerId: string; username: string }>
 > => {
-  const cacheFile = Bun.file(".clan_members_cache");
+  const cacheFilePath = ".clan_members_cache";
   await mkdir(".cache", { recursive: true });
 
   let cached: {
     timestamp: number;
     data: Array<{ playerId: string; username: string }>;
   } | null = null;
-  if (await cacheFile.exists()) {
-    try {
-      cached = JSON.parse(await cacheFile.text());
-      if (cached && Date.now() - cached.timestamp < 60 * 60 * 1000) {
-        return cached.data;
-      }
-    } catch {}
+
+  try {
+    await access(cacheFilePath, constants.F_OK);
+    const content = await readFile(cacheFilePath, "utf-8");
+    cached = JSON.parse(content);
+    if (cached && Date.now() - cached.timestamp < 60 * 60 * 1000) {
+      return cached.data;
+    }
+  } catch {
+    // File doesn't exist or is invalid, continue
   }
 
   const response = await fetch(
@@ -74,7 +82,10 @@ export const getClanMembers = async (): Promise<
     playerId: string;
     username: string;
   }>;
-  await cacheFile.write(JSON.stringify({ timestamp: Date.now(), data }));
+  await writeFile(
+    cacheFilePath,
+    JSON.stringify({ timestamp: Date.now(), data }),
+  );
   return data;
 };
 

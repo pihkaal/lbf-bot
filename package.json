@@ -1,19 +1,10 @@
 {
-  "name": "wov-quest-results",
-  "module": "src/index.ts",
-  "type": "module",
+  "name": "lbf",
+  "packageManager": "pnpm@10.20.0",
   "scripts": {
     "format": "prettier --write --cache ."
   },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "prettier": "^3.5.3"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
   "dependencies": {
-    "discord.js": "^14.21.0",
-    "zod": "^3.24.4"
+    "prettier": "3.6.2"
   }
 }
