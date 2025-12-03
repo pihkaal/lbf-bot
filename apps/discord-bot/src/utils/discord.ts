@@ -1,20 +1,6 @@
-import { getAccountBalance, setAccountBalance } from "./account";
-import { env } from "./env";
-import type { QuestResult } from "./wov";
-
-export type DiscordMessage = {
-  content: string;
-  embeds: Array<DiscordEmbed>;
-};
-
-export type DiscordEmbed = {
-  title?: string;
-  description: string;
-  image?: {
-    url: string;
-  };
-  color: number;
-};
+import { getAccountBalance, setAccountBalance } from "~/services/account";
+import { env } from "~/env";
+import type { QuestResult, DiscordMessage, DiscordEmbed } from "~/types";
 
 export const makeResultEmbed = async (
   result: QuestResult,
@@ -82,3 +68,30 @@ export const makeResultEmbed = async (
     ],
   };
 };
+
+export const createErrorEmbed = (message: string, color = 15335424) => ({
+  embeds: [
+    {
+      description: `### ❌ Erreur\n\n\n${message}`,
+      color,
+    },
+  ],
+});
+
+export const createSuccessEmbed = (message: string, color = 65280) => ({
+  embeds: [
+    {
+      description: `### ✅ ${message}`,
+      color,
+    },
+  ],
+});
+
+export const createInfoEmbed = (message: string, color = 0x89cff0) => ({
+  embeds: [
+    {
+      description: message,
+      color,
+    },
+  ],
+});

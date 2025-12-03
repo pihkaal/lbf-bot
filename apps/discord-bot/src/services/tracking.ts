@@ -1,10 +1,9 @@
-import { getPlayer } from "./wov";
+import { getPlayer } from "~/services/wov";
 import { readFile, writeFile, access } from "node:fs/promises";
 import { constants } from "node:fs";
+import type { TrackedPlayers } from "~/types";
 
 const TRACKED_PLAYER_FILE = "./.cache/tracked.json";
-
-type TrackedPlayers = Record<string, string[]>;
 
 export async function initTracking(): Promise<void> {
   try {

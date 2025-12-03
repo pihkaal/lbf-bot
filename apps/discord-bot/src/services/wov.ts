@@ -1,21 +1,7 @@
-import { env } from "./env";
+import { env } from "~/env";
 import { mkdir, readFile, writeFile, access } from "node:fs/promises";
 import { constants } from "node:fs";
-
-export type QuestResult = {
-  quest: {
-    id: string;
-    promoImageUrl: string;
-    promoImagePrimaryColor: string;
-  };
-  participants: Array<QuestParticipant>;
-};
-
-export type QuestParticipant = {
-  playerId: string;
-  username: string;
-  xp: number;
-};
+import type { QuestResult } from "~/types";
 
 export const getLatestQuest = async (): Promise<QuestResult> => {
   const response = await fetch(
@@ -49,6 +35,7 @@ export const checkForNewQuest = async (): Promise<QuestResult | null> => {
   await writeFile(cacheFilePath, lastId);
   return lastQuest;
 };
+
 export const getClanMembers = async (): Promise<
   Array<{ playerId: string; username: string }>
 > => {
