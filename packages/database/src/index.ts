@@ -10,4 +10,5 @@ export const db = drizzle(env.DATABASE_URL, {
 });
 
 export { redis } from "~/redis";
+export { runMigrations } from "~/migrate";
 export * from "drizzle-orm";

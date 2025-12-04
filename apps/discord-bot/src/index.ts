@@ -3,6 +3,10 @@ import { Client, GatewayIntentBits, Partials } from "discord.js";
 import { setupBotMode } from "~/modes/bot";
 import { setupUserMode } from "~/modes/user";
 import { parseArgs } from "~/utils/cli";
+import { runMigrations } from "@lbf-bot/database";
+
+console.log("Running database migrations...");
+await runMigrations();
 
 const mode = parseArgs(process.argv.slice(2));
 
