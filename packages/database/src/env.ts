@@ -3,4 +3,5 @@ import { parseEnv } from "@lbf-bot/utils";
 
 export const env = parseEnv({
   DATABASE_URL: z.url().min(1, "Required"),
+  REDIS_URL: z.url().min(1, "Required"),
 });
