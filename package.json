@@ -1,6 +1,6 @@
 {
   "name": "lbf",
-  "packageManager": "pnpm@10.20.0",
+  "packageManager": "pnpm@10.24.0",
   "scripts": {
     "format": "prettier --write --cache ."
   },
