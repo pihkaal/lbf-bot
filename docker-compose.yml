@@ -28,7 +28,7 @@ services:
       - postgres
       - redis
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-lbf-bot}
       - REDIS_URL=redis://redis:6379
       - DISCORD_BOT_TOKEN
       - DISCORD_MENTION
