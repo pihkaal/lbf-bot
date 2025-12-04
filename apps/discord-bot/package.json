@@ -2,7 +2,7 @@
   "name": "@lbf/discord-bot",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx src/index.ts",
     "start": "node dist/index.js",
     "build": "rm -rf dist && tsc --project tsconfig.build.json && tsc-alias --project tsconfig.build.json",
     "dev:user": "tsx src/index.ts -- --user"
