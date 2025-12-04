@@ -10,6 +10,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - lbf-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -25,8 +30,10 @@ services:
       dockerfile: apps/discord-bot/Dockerfile
     restart: unless-stopped
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - lbf-network
     environment:
