@@ -25,9 +25,7 @@ services:
       - lbf-network
 
   discord-bot:
-    build:
-      context: .
-      dockerfile: apps/discord-bot/Dockerfile
+    image: pihkaal/lbf-bot-discord-bot:latest
     restart: unless-stopped
     depends_on:
       postgres:
