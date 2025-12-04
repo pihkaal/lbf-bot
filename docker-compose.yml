@@ -8,16 +8,16 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-lbf-bot}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    networks:
+      - lbf-network
 
   redis:
     image: redis:7-alpine
     restart: unless-stopped
     volumes:
       - redis_data:/data
-    ports:
-      - "6379:6379"
+    networks:
+      - lbf-network
 
   discord-bot:
     build:
@@ -27,6 +27,8 @@ services:
     depends_on:
       - postgres
       - redis
+    networks:
+      - lbf-network
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-lbf-bot}
       - REDIS_URL=redis://redis:6379
@@ -43,6 +45,10 @@ services:
       - WOV_TRACKING_INTERVAL
       - QUEST_REWARDS
       - QUEST_EXCLUDE
+
+networks:
+  lbf-network:
+    driver: bridge
 
 volumes:
   postgres_data:
