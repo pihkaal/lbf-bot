@@ -1,35 +1,28 @@
 import { getPlayer } from "~/services/wov";
-import { readFile, writeFile, access } from "node:fs/promises";
-import { constants } from "node:fs";
-import type { TrackedPlayers } from "~/types";
-
-const TRACKED_PLAYER_FILE = "./.cache/tracked.json";
-
-export async function initTracking(): Promise<void> {
-  try {
-    await access(TRACKED_PLAYER_FILE, constants.F_OK);
-  } catch {
-    await writeFile(TRACKED_PLAYER_FILE, "{}");
-  }
-}
+import { db, tables, eq } from "@lbf-bot/database";
 
 export async function listTrackedPlayers(): Promise<string[]> {
-  const content = await readFile(TRACKED_PLAYER_FILE, "utf-8");
-  const trackedPlayers: TrackedPlayers = JSON.parse(content);
+  const players = await db.query.trackedPlayers.findMany({
+    columns: {
+      playerId: true,
+    },
+  });
 
-  return Object.keys(trackedPlayers);
+  return players.map((p) => p.playerId);
 }
 
 export async function untrackWovPlayer(
   playerId: string,
 ): Promise<{ event: "notTracked" } | { event: "trackerRemoved" }> {
-  const content = await readFile(TRACKED_PLAYER_FILE, "utf-8");
-  const trackedPlayers: TrackedPlayers = JSON.parse(content);
+  const player = await db.query.trackedPlayers.findFirst({
+    where: eq(tables.trackedPlayers.playerId, playerId),
+  });
 
-  if (!trackedPlayers[playerId]) return { event: "notTracked" };
+  if (!player) return { event: "notTracked" };
 
-  delete trackedPlayers[playerId];
-  await writeFile(TRACKED_PLAYER_FILE, JSON.stringify(trackedPlayers));
+  await db
+    .delete(tables.trackedPlayers)
+    .where(eq(tables.trackedPlayers.playerId, playerId));
 
   return { event: "trackerRemoved" };
 }
@@ -42,23 +35,35 @@ export async function trackWovPlayer(playerId: string): Promise<
   | { event: "changed"; oldUsernames: string[]; newUsername: string }
   | { event: "none" }
 > {
-  const content = await readFile(TRACKED_PLAYER_FILE, "utf-8");
-  const trackedPlayers: TrackedPlayers = JSON.parse(content);
-
   const player = await getPlayer(playerId);
   if (!player) return { event: "notFound" };
 
-  const currentUsernames = trackedPlayers[playerId];
-  if (currentUsernames) {
-    const oldUsernames = [...currentUsernames];
-    if (!currentUsernames.includes(player.username)) {
-      currentUsernames.push(player.username);
+  const tracked = await db.query.trackedPlayers.findFirst({
+    where: eq(tables.trackedPlayers.playerId, playerId),
+    with: {
+      usernameHistory: {
+        orderBy: (history, { asc }) => [asc(history.firstSeenAt)],
+      },
+    },
+  });
 
-      await writeFile(TRACKED_PLAYER_FILE, JSON.stringify(trackedPlayers));
+  if (tracked) {
+    const currentUsernames = tracked.usernameHistory.map((h) => h.username);
+
+    if (!currentUsernames.includes(player.username)) {
+      await db.insert(tables.usernameHistory).values({
+        playerId,
+        username: player.username,
+      });
+
+      await db
+        .update(tables.trackedPlayers)
+        .set({ updatedAt: new Date() })
+        .where(eq(tables.trackedPlayers.playerId, playerId));
 
       return {
         event: "changed",
-        oldUsernames,
+        oldUsernames: currentUsernames,
         newUsername: player.username,
       };
     } else {
@@ -67,8 +72,15 @@ export async function trackWovPlayer(playerId: string): Promise<
       };
     }
   } else {
-    trackedPlayers[playerId] = [player.username];
-    await writeFile(TRACKED_PLAYER_FILE, JSON.stringify(trackedPlayers));
+    await db.insert(tables.trackedPlayers).values({
+      playerId,
+    });
+
+    await db.insert(tables.usernameHistory).values({
+      playerId,
+      username: player.username,
+    });
+
     return { event: "registered" };
   }
 }

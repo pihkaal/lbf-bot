@@ -1,10 +1,5 @@
-import { initAccounts } from "~/services/account";
 import { env } from "~/env";
-import {
-  initTracking,
-  listTrackedPlayers,
-  trackWovPlayer,
-} from "~/services/tracking";
+import { listTrackedPlayers, trackWovPlayer } from "~/services/tracking";
 import { checkForNewQuest } from "~/services/wov";
 import { createInfoEmbed } from "~/utils/discord";
 import { askForGrinders } from "~/utils/quest";
@@ -93,9 +88,6 @@ client.on("ready", async (client) => {
       process.exit(0);
     });
   } else {
-    await initAccounts();
-    await initTracking();
-
     await questCheckCron();
     setInterval(questCheckCron, env.WOV_FETCH_INTERVAL);
 

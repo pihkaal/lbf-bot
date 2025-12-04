@@ -1,6 +1,5 @@
 import { env } from "~/env";
-import { mkdir, readFile, writeFile, access } from "node:fs/promises";
-import { constants } from "node:fs";
+import { redis } from "@lbf-bot/database";
 import type { QuestResult } from "~/types";
 
 export const getLatestQuest = async (): Promise<QuestResult> => {
@@ -17,45 +16,23 @@ export const getLatestQuest = async (): Promise<QuestResult> => {
 
 export const checkForNewQuest = async (): Promise<QuestResult | null> => {
   const lastQuest = await getLatestQuest();
-
   const lastId = lastQuest.quest.id;
-  const cacheFilePath = ".cache/.quest_cache";
-  await mkdir(".cache", { recursive: true });
 
-  try {
-    await access(cacheFilePath, constants.F_OK);
-    const cachedQuestId = await readFile(cacheFilePath, "utf-8");
-    if (cachedQuestId === lastId || cachedQuestId === "IGNORE") {
-      return null;
-    }
-  } catch {
-    // File doesn't exist, continue
+  const cachedQuestId = await redis.get("quest:last_id");
+  if (cachedQuestId === lastId || cachedQuestId === "IGNORE") {
+    return null;
   }
 
-  await writeFile(cacheFilePath, lastId);
+  await redis.set("quest:last_id", lastId);
   return lastQuest;
 };
 
 export const getClanMembers = async (): Promise<
   Array<{ playerId: string; username: string }>
 > => {
-  const cacheFilePath = ".clan_members_cache";
-  await mkdir(".cache", { recursive: true });
-
-  let cached: {
-    timestamp: number;
-    data: Array<{ playerId: string; username: string }>;
-  } | null = null;
-
-  try {
-    await access(cacheFilePath, constants.F_OK);
-    const content = await readFile(cacheFilePath, "utf-8");
-    cached = JSON.parse(content);
-    if (cached && Date.now() - cached.timestamp < 60 * 60 * 1000) {
-      return cached.data;
-    }
-  } catch {
-    // File doesn't exist or is invalid, continue
+  const cached = await redis.get("clan:members");
+  if (cached) {
+    return JSON.parse(cached);
   }
 
   const response = await fetch(
@@ -69,10 +46,8 @@ export const getClanMembers = async (): Promise<
     playerId: string;
     username: string;
   }>;
-  await writeFile(
-    cacheFilePath,
-    JSON.stringify({ timestamp: Date.now(), data }),
-  );
+
+  await redis.set("clan:members", JSON.stringify(data), "EX", 60 * 60);
   return data;
 };
 
