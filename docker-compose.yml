@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-lbf-bot}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+
+  discord-bot:
+    build:
+      context: .
+      dockerfile: apps/discord-bot/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - REDIS_URL=redis://redis:6379
+      - DISCORD_BOT_TOKEN
+      - DISCORD_MENTION
+      - DISCORD_REWARDS_GIVER
+      - DISCORD_REWARDS_CHANNEL
+      - DISCORD_ADMIN_MENTION
+      - DISCORD_ADMIN_CHANNEL
+      - DISCORD_TRACKING_CHANNEL
+      - WOV_API_KEY
+      - WOV_CLAN_ID
+      - WOV_FETCH_INTERVAL
+      - WOV_TRACKING_INTERVAL
+      - QUEST_REWARDS
+      - QUEST_EXCLUDE
+
+volumes:
+  postgres_data:
+  redis_data:
