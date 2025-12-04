@@ -1,7 +1,7 @@
 import { ChannelType, type Client, type Message } from "discord.js";
 import { env } from "~/env";
 import { makeResultEmbed } from "~/utils/discord";
-import type { QuestResult } from "~/types";
+import type { QuestResult } from "~/services/wov";
 
 export const askForGrinders = async (quest: QuestResult, client: Client) => {
   const adminChannel = await client.channels.fetch(env.DISCORD_ADMIN_CHANNEL);

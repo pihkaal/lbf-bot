@@ -1,16 +1,17 @@
 import { getAccountBalance, setAccountBalance } from "~/services/account";
 import { env } from "~/env";
-import type { QuestResult, DiscordMessage, DiscordEmbed } from "~/types";
+import type { QuestResult } from "~/services/wov";
+import type { MessageCreateOptions, APIEmbed } from "discord.js";
 
 export const makeResultEmbed = async (
   result: QuestResult,
   exclude: Array<string>,
-): Promise<DiscordMessage> => {
+): Promise<MessageCreateOptions> => {
   const imageUrl = result.quest.promoImageUrl;
   const color = parseInt(result.quest.promoImagePrimaryColor.substring(1), 16);
   const participants = result.participants.toSorted((a, b) => b.xp - a.xp);
 
-  let rewardsEmbed: DiscordEmbed | undefined;
+  let rewardsEmbed: APIEmbed | undefined;
   if (env.QUEST_REWARDS) {
     const rewardedParticipants = participants
       .map((x) => ({ id: x.playerId, username: x.username }))
@@ -69,7 +70,10 @@ export const makeResultEmbed = async (
   };
 };
 
-export const createErrorEmbed = (message: string, color = 15335424) => ({
+export const createErrorEmbed = (
+  message: string,
+  color = 15335424,
+): MessageCreateOptions => ({
   embeds: [
     {
       description: `### ❌ Erreur\n\n\n${message}`,
@@ -78,7 +82,10 @@ export const createErrorEmbed = (message: string, color = 15335424) => ({
   ],
 });
 
-export const createSuccessEmbed = (message: string, color = 65280) => ({
+export const createSuccessEmbed = (
+  message: string,
+  color = 65280,
+): MessageCreateOptions => ({
   embeds: [
     {
       description: `### ✅ ${message}`,
@@ -87,7 +94,10 @@ export const createSuccessEmbed = (message: string, color = 65280) => ({
   ],
 });
 
-export const createInfoEmbed = (message: string, color = 0x89cff0) => ({
+export const createInfoEmbed = (
+  message: string,
+  color = 0x89cff0,
+): MessageCreateOptions => ({
   embeds: [
     {
       description: message,

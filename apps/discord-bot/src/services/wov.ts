@@ -1,6 +1,20 @@
 import { env } from "~/env";
 import { redis } from "@lbf-bot/database";
-import type { QuestResult } from "~/types";
+
+export type QuestResult = {
+  quest: {
+    id: string;
+    promoImageUrl: string;
+    promoImagePrimaryColor: string;
+  };
+  participants: Array<QuestParticipant>;
+};
+
+export type QuestParticipant = {
+  playerId: string;
+  username: string;
+  xp: number;
+};
 
 export const getLatestQuest = async (): Promise<QuestResult> => {
   const response = await fetch(
