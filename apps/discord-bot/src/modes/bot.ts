@@ -1,7 +1,11 @@
 import type { Client } from "discord.js";
 import { env } from "~/env";
-import { listTrackedPlayers, trackWovPlayer } from "~/services/tracking";
-import { checkForNewQuest } from "~/services/wov";
+import {
+  listTrackedPlayers,
+  getTrackedPlayerUsernames,
+  addUsernameToHistory,
+} from "~/services/tracking";
+import { checkForNewQuest, getPlayer } from "~/services/wov";
 import { createInfoEmbed } from "~/utils/discord";
 import { askForGrinders } from "~/utils/quest";
 import { commands } from "~/commands";
@@ -16,17 +20,23 @@ const questCheckCron = async (client: Client) => {
 const trackingCron = async (client: Client) => {
   const trackedPlayers = await listTrackedPlayers();
   for (const playerId of trackedPlayers) {
-    const res = await trackWovPlayer(playerId);
-    if (res.event !== "changed") return;
+    const player = await getPlayer(playerId);
+    if (!player) continue;
+
+    const usernames = await getTrackedPlayerUsernames(playerId);
+    if (usernames.includes(player.username)) continue;
+
+    await addUsernameToHistory(playerId, player.username);
 
     const chan = client.channels.cache.get(env.DISCORD_TRACKING_CHANNEL);
     if (!chan?.isSendable()) throw "Invalid tracking channel";
 
-    const lastUsername = res.oldUsernames[res.oldUsernames.length - 1];
+    const lastUsername = usernames[usernames.length - 1];
 
     await chan.send(
       createInfoEmbed(
-        `### [UPDATE] \`${lastUsername}\` -> \`${res.newUsername}\` [\`${playerId}\`]\n\n**Nouveau pseudo:** \`${res.newUsername}\`\n**Anciens pseudos:**\n${res.oldUsernames.map((x) => `- \`${x}\``).join("\n")}`,
+        `### [UPDATE] \`${lastUsername}\` -> \`${player.username}\` [\`${playerId}\`]\n\n**Nouveau pseudo:** \`${player.username}\`\n**Anciens pseudos:**\n${usernames.map((x) => `- \`${x}\``).join("\n")}`,
+        0x00ea00,
       ),
     );
   }

@@ -72,7 +72,7 @@ export const makeResultEmbed = async (
 
 export const createErrorEmbed = (
   message: string,
-  color = 15335424,
+  color = 0xea0000,
 ): MessageCreateOptions => ({
   embeds: [
     {
@@ -84,7 +84,7 @@ export const createErrorEmbed = (
 
 export const createSuccessEmbed = (
   message: string,
-  color = 65280,
+  color = 0x00ea00,
 ): MessageCreateOptions => ({
   embeds: [
     {
