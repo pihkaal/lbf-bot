@@ -1,5 +1,5 @@
 {
-  "name": "lbf",
+  "name": "lbf-bot",
   "packageManager": "pnpm@10.24.0",
   "scripts": {
     "format": "prettier --write --cache ."
