@@ -58,5 +58,10 @@ export const gemmesCommand: Command = async (message, args) => {
         )
         .setColor(0x4289c1),
     ],
+    options: {
+      allowedMentions: {
+        repliedUser: false,
+      },
+    },
   });
 };

@@ -47,5 +47,10 @@ export const iconeCommand: Command = async (message, args) => {
         )
         .setColor(65280),
     ],
+    options: {
+      allowedMentions: {
+        repliedUser: false,
+      },
+    },
   });
 };
