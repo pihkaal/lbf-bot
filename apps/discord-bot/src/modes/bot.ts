@@ -52,7 +52,7 @@ const trackingCron = async (client: Client) => {
     );
 
     trackingLogger.info(
-      `Username changed: ${lastUsername}\` -> \`${player.username} [\`${playerId}\`]`,
+      `Username changed: ${lastUsername} -> ${player.username} [${playerId}]`,
     );
   }
 };
