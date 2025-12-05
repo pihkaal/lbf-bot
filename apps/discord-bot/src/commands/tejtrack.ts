@@ -3,6 +3,9 @@ import { isWovPlayerTracked, untrackWovPlayer } from "~/services/tracking";
 import { searchPlayer } from "~/services/wov";
 import { replyError, createInfoEmbed, replySuccess } from "~/utils/discord";
 import { env } from "~/env";
+import { createLogger } from "@lbf-bot/utils";
+
+const trackingLogger = createLogger({ prefix: "tracking" });
 
 export const tejtrackCommand: Command = async (message, args) => {
   // check staff permission
@@ -45,7 +48,9 @@ export const tejtrackCommand: Command = async (message, args) => {
   );
 
   const chan = message.client.channels.cache.get(env.DISCORD_TRACKING_CHANNEL);
-  if (!chan?.isSendable()) throw "Invalid tracking channel";
+  if (!chan?.isSendable()) {
+    return trackingLogger.fatal("Invalid 'DISCORD_TRACKING_CHANNEL'");
+  }
 
   await chan.send(
     createInfoEmbed(

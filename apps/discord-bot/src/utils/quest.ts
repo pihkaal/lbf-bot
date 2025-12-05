@@ -2,11 +2,15 @@ import { ChannelType, type Client, type Message } from "discord.js";
 import { env } from "~/env";
 import { makeResultEmbed } from "~/utils/discord";
 import type { QuestResult } from "~/services/wov";
+import { createLogger } from "@lbf-bot/utils";
+
+const questLogger = createLogger({ prefix: "quests" });
 
 export const askForGrinders = async (quest: QuestResult, client: Client) => {
   const adminChannel = await client.channels.fetch(env.DISCORD_ADMIN_CHANNEL);
-  if (!adminChannel || adminChannel.type !== ChannelType.GuildText)
-    throw "Invalid admin channel provided";
+  if (!adminChannel || adminChannel.type !== ChannelType.GuildText) {
+    return questLogger.fatal("Invalid 'DISCORD_ADMIN_CHANNEL'");
+  }
 
   const top10 = quest.participants
     .filter((x) => !env.QUEST_EXCLUDE.includes(x.username))
@@ -91,7 +95,9 @@ export const askForGrinders = async (quest: QuestResult, client: Client) => {
     }
   }
 
-  if (answer === null) throw "unreachable";
+  if (answer === null) {
+    return questLogger.fatal("Answer was 'null', this should be unreachable");
+  }
 
   const exclude = answer
     .split(",")
@@ -107,9 +113,9 @@ export const askForGrinders = async (quest: QuestResult, client: Client) => {
   if (rewardChannel && rewardChannel.type === ChannelType.GuildText) {
     await rewardChannel.send(embed);
   } else {
-    throw "Invalid reward channel";
+    return questLogger.fatal("Invalid 'DISCORD_REWARDS_CHANNEL'");
   }
 
   await adminChannel.send("Envoyé !");
-  console.log(`Quest result posted at: ${new Date().toISOString()}`);
+  questLogger.info(`Results posted at: ${new Date().toISOString()}`);
 };

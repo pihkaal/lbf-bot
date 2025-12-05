@@ -4,13 +4,14 @@ import { setupBotMode } from "~/modes/bot";
 import { setupUserMode } from "~/modes/user";
 import { parseArgs } from "~/utils/cli";
 import { runMigrations } from "@lbf-bot/database";
+import { logger } from "@lbf-bot/utils";
 
-console.log("Running database migrations...");
+logger.info("Running database migrations...");
 await runMigrations();
 
 const mode = parseArgs(process.argv.slice(2));
 
-console.log(`Mode: ${mode.type}`);
+logger.info(`Mode: ${mode.type}`);
 
 const client = new Client({
   intents: [
@@ -35,8 +36,7 @@ switch (mode.type) {
 
   default: {
     // @ts-ignore
-    console.error(`ERROR: Not implemented: '${mode.type}'`);
-    process.exit(1);
+    return logger.fatal(`ERROR: Not implemented: '${mode.type}'`);
   }
 }
 

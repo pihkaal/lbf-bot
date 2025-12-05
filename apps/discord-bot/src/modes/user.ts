@@ -1,10 +1,12 @@
+import { logger } from "@lbf-bot/utils";
 import type { Client, TextChannel } from "discord.js";
 import { ChannelType } from "discord.js";
 import * as readline from "node:readline";
 
 export const setupUserMode = (client: Client, channelId: string) => {
   client.on("clientReady", (client) => {
-    console.log(`Logged in as ${client.user.username}`);
+    logger.info(`Client ready`);
+    logger.info(`Connected as @${client.user.username}`);
 
     const chan = client.channels.cache.get(channelId);
     if (chan?.type !== ChannelType.GuildText) {

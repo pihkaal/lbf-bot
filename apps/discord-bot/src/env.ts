@@ -1,5 +1,8 @@
 import { z } from "zod";
 import "dotenv/config";
+import { logger } from "@lbf-bot/utils";
+
+// TODO: use parseEnv from utils
 
 const schema = z.object({
   DISCORD_BOT_TOKEN: z.string(),
@@ -29,13 +32,11 @@ const schema = z.object({
 
 const result = schema.safeParse(process.env);
 if (!result.success) {
-  console.log("❌ Invalid environments variables:");
-  console.log(
-    result.error.errors
+  logger.fatal(
+    `❌ Invalid environments variables:\n${result.error.errors
       .map((x) => `- ${x.path.join(".")}: ${x.message}`)
-      .join("\n"),
+      .join("\n")}`,
   );
-  process.exit(1);
 }
 
 export const env = result.data;
