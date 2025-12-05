@@ -36,7 +36,7 @@ switch (mode.type) {
 
   default: {
     // @ts-ignore
-    return logger.fatal(`ERROR: Not implemented: '${mode.type}'`);
+    logger.fatal(`ERROR: Not implemented: '${mode.type}'`);
   }
 }
 
