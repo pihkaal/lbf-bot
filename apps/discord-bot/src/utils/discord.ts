@@ -1,7 +1,7 @@
 import { getAccountBalance, setAccountBalance } from "~/services/account";
 import { env } from "~/env";
 import type { QuestResult } from "~/services/wov";
-import type { MessageCreateOptions, APIEmbed } from "discord.js";
+import type { MessageCreateOptions, APIEmbed, Message } from "discord.js";
 
 export const makeResultEmbed = async (
   result: QuestResult,
@@ -105,3 +105,12 @@ export const createInfoEmbed = (
     },
   ],
 });
+
+export const replyError = (message: Message, text: string, color?: number) =>
+  message.reply(createErrorEmbed(text, color));
+
+export const replySuccess = (message: Message, text: string, color?: number) =>
+  message.reply(createSuccessEmbed(text, color));
+
+export const replyInfo = (message: Message, text: string, color?: number) =>
+  message.reply(createInfoEmbed(text, color));
